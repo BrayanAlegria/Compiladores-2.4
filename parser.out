@@ -1,0 +1,51 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    COMILLAS
+    DERCORCHET
+    DOSPUNTOS
+    ENTERO
+    IZQCORCHET
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> statement
+Rule 2     program -> program statement
+Rule 3     statement -> while_loop_statement
+Rule 4     statement -> print_statement
+Rule 5     while_loop_statement -> WHILE IZQPARENT expression MAYORQUE INT DERPARENT LLAVEIZQ print_statement LLAVEDER
+Rule 6     print_statement -> PRINT IZQPARENT STRING DERPARENT PUNTOCOMA
+Rule 7     expression -> ID
+Rule 8     expression -> INT
+Rule 9     expression -> STRING
+
+Terminals, with rules where they appear
+
+COMILLAS             : 
+DERCORCHET           : 
+DERPARENT            : 5 6
+DOSPUNTOS            : 
+ENTERO               : 
+ID                   : 7
+INT                  : 5 8
+IZQCORCHET           : 
+IZQPARENT            : 5 6
+MAYORQUE             : 5
+PRINT                : 6
+PUNTOCOMA            : 6
+STRING               : 6 9
+WHILE                : 5
+error                : 
+
+Nonterminals, with rules where they appear
+
+LLAVEDER             : 5
+LLAVEIZQ             : 5
+expression           : 5
+print_statement      : 4 5
+program              : 2 0
+statement            : 1 2
+while_loop_statement : 3
+
