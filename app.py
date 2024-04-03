@@ -11,9 +11,9 @@ def index():
 
 @app.route('/analizar', methods=['POST'])
 def analizar_cadena_lexico():
-    cadena = request.json['cadena_lexico']
+    cadena = request.json['cadena']
     try:
-        tokens_lexicos = analizar_cadena_lexico(cadena)  
+        tokens_lexicos = analizar_lexico(cadena)  
         return jsonify(resultado_lexico=tokens_lexicos)
     except Exception as e:
         return jsonify(error=str(e))

@@ -1,55 +1,66 @@
-from flask import Flask, jsonify
-from analizador_lexico import lexer, tokens
+from flask import Flask, render_template, request, jsonify
+from analizador_lexico import lexer, ingreso, tokens
 from ply.yacc import yacc
 
 app = Flask(__name__)
 
-tokens = lexer.tokens
-
-# Regla inicial del programa
 def p_program(p):
     '''
     program : statement
             | program statement
     '''
 
-# Regla para las sentencias
 def p_statement(p):
     '''
     statement : while_loop_statement
-              | print_statement
     '''
 
-# Regla para el bucle while
 def p_while_loop_statement(p):
     '''
     while_loop_statement : WHILE IZQPARENT expression MAYORQUE INT DERPARENT LLAVEIZQ print_statement LLAVEDER
     '''
 
-# Regla para la sentencia print
 def p_print_statement(p):
     '''
     print_statement : PRINT IZQPARENT STRING DERPARENT PUNTOCOMA
     '''
 
-# Regla para la expresión
 def p_expression(p):
     '''
     expression : ID
                | INT
-               | STRING
     '''
 
-# Manejo de errores sintácticos
 def p_error(p):
-    if p:
-        raise SyntaxError(f"Error sintáctico en la posición {p.lexpos}")
-    else:
-        raise SyntaxError("Error sintáctico: fin de archivo inesperado")
+    raise SyntaxError("Error sintáctico en la posición {}".format(p.lexpos))
 
-# Construcción del analizador sintáctico
 parser = yacc()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/analizar_lexico', methods=['POST'])
+def analizar_cadena_lexico():
+    cadena = request.json['cadena']
+    try:
+        tokens_lexicos = ingreso(cadena)
+        return jsonify(resultado_lexico=tokens_lexicos)
+    except Exception as e:
+        return jsonify(error=str(e))
+
+@app.route('/analizar_sintactico', methods=['POST'])
+def analizar_cadena_sintactico():
+    cadena = request.json['cadena']
+    try:
+        resultado_sintactico = parser.parse(cadena, lexer=lexer)
+        if resultado_sintactico is None:
+            mensaje = "La cadena fue aceptada correctamente."
+        else:
+            mensaje = "Cadena no aceptada"
+        return jsonify(resultado_sintactico=mensaje)
+    except SyntaxError as e:
+        return jsonify(error=str(e))
 
 if __name__ == '__main__':
     app.run(debug=True)
-

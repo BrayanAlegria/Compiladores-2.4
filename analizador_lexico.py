@@ -4,7 +4,8 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 tokens = ['PRINT', 'IZQPARENT', 'DERPARENT', 'IZQCORCHET', 'DERCORCHET', 'MAYORQUE', 
-          'INT', 'PUNTOCOMA', 'COMILLAS', 'DOSPUNTOS', 'ENTERO', 'ID', 'WHILE', 'STRING']  
+          'INT', 'PUNTOCOMA', 'COMILLAS', 'DOSPUNTOS', 'ENTERO', 'ID', 'WHILE']
+
 
 palabras_reservadas = {
     'print': 'PRINT',
@@ -16,10 +17,10 @@ def clasificar_token(token):
         return 'Token inválido: None'
     elif token.type == 'ID':
         return 'Identificador' if token.value not in palabras_reservadas else 'Palabra reservada'
-    elif token.type in ['INT', 'ENTERO', 'STRING']:
+    elif token.type in ['INT', 'ENTERO']:
         return 'Tipo de dato'
     elif token.type in ['COMILLAS', 'DOSPUNTOS', 'IZQPARENT', 'DERPARENT', 'PUNTOCOMA', 'IZQCORCHET', 'DERCORCHET', 'MAYORQUE']:
-        return 'Símbolo'
+        return 'Error de tipo sintáctico DERCORCHET en }'
     elif token.type == 'PRINT':
         return 'Reservada PRINT'
     elif token.type == 'WHILE':
@@ -38,10 +39,7 @@ def t_INT(t):
     t.type = 'ENTERO'  
     return t
 
-def t_STRING(t):
-    r'\"([^\\\"]|\\.)*\"' 
-    return t
-
+    
 t_PUNTOCOMA = r'\;'
 t_IZQPARENT = r'\('
 t_DERPARENT = r'\)'
@@ -53,8 +51,7 @@ t_DOSPUNTOS = r'\:'
 t_ignore = ' \t\n'
 
 def t_error(t):
-    t.lexer.skip(1)  
-    return t
+    return f"Carácter ilegal '{t.value}' en la posición {t.lexpos}"
 
 lexer = lex.lex()
 
@@ -80,7 +77,7 @@ def analizar_cadena():
     cadena = request.json['cadena']
     try:
         resultado_lexico = ingreso(cadena)
-        return jsonify(resultado_lexico=[(f'" {token.value} " Token de tipo: {clasificar_token(token)}') for token in resultado_lexico])
+        return jsonify(resultado_lexico=[(f' {clasificar_token(token)}') for token in resultado_lexico])
     except Exception as e:
         return jsonify(error=str(e))
 
